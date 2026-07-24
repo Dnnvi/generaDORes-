@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cifraDOR Zampoña</title>
+<style>
+  :root{
+    --paper: #f5f4fb;
+    --grid-line: #dcdaf0;
+    --ink: #241f47;
+    --ink-soft: #5b5490;
+    --chord: #4338ca;
+    --chord-soft: #e3e1fb;
+    --line: #7c3aed;
+    --line-soft: #efe9fd;
+    --tapa: #2451a6;
+    --tapa-soft: #dde7f9;
+    --accent-red: #7e22ce;
+    --card-bg: #fdfcff;
+    --shadow: 0 1px 0 rgba(36,31,71,.06), 0 8px 24px rgba(36,31,71,.08);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:transparent;color:var(--ink);
+    font-family:'Times New Roman', Times, serif;}
+
+  .app{
+    max-width:900px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+  }
+
+  /* ---------- header ---------- */
+  .app-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:22px;
+  }
+  .app-title{
+    font-family:'Times New Roman', Times, serif;
+    font-size:2.6rem;
+    font-weight:700;
+    line-height:1;
+    color:var(--ink);
+    margin:0;
+  }
+  .app-title span{color:var(--chord);}
+  .app-sub{
+    font-size:.82rem;
+    color:var(--ink-soft);
+    margin:4px 0 0;
+  }
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{
+    font-family:'Times New Roman', Times, serif;
+    font-size:.78rem;
+    font-weight:600;
+    letter-spacing:.02em;
+    border:1.5px solid var(--ink);
+    background:var(--card-bg);
+    color:var(--ink);
+    padding:7px 12px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:transform .12s ease, background .12s ease;
+  }
+  .btn:hover{background:var(--ink);color:var(--paper);}
+  .btn:active{transform:scale(.96);}
+  .btn.primary{background:var(--ink);color:var(--paper);}
+  .btn.primary:hover{background:var(--line);border-color:var(--line);}
+  .btn.ghost{border-style:dashed;font-weight:500;}
+  .btn.danger{border-color:var(--accent-red);color:var(--accent-red);background:transparent;}
+  .btn.danger:hover{background:var(--accent-red);color:#fff;}
+
+  .song-title-row{margin-bottom:26px;}
+  .song-title-row input{
+    width:100%;
+    border:none;
+    border-bottom:1px dashed var(--grid-line);
+    background:transparent;
+    font-family:'Times New Roman', Times, serif;
+    font-size:1.6rem;
+    color:var(--ink);
+    padding:4px 2px;
+  }
+  .song-title-row input:focus{outline:none;border-bottom:1px solid var(--line);}
+  .song-title-row input::placeholder{color:#b7bdca;}
+
+  /* ---------- section card (papel cuadriculado) ---------- */
+  .section-card{
+    position:relative;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/22px 22px,
+      var(--card-bg);
+    border:1px solid var(--grid-line);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:18px 18px 16px;
+    margin-bottom:24px;
+  }
+  .section-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .section-name{
+    font-family:'Times New Roman', Times, serif;
+    font-weight:700;
+    font-size:1.5rem;
+    color:var(--ink);
+    background:transparent;
+    border:none;
+    border-bottom:2px solid transparent;
+    padding:0 2px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    flex:1;
+    min-width:120px;
+  }
+  .section-name:focus{outline:none;border-bottom:2px solid var(--chord);}
+  .icon-btn{
+    background:transparent;
+    border:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:.95rem;
+    padding:2px 6px;
+    border-radius:5px;
+  }
+  .icon-btn:hover{background:var(--grid-line);color:var(--accent-red);}
+
+  /* ---------- group (par de líneas acorde/nota) ---------- */
+  .group{
+    position:relative;
+    margin:0 0 18px;
+    padding:10px 10px 12px 4px;
+  }
+  .group + .group{border-top:1px dashed var(--grid-line);padding-top:16px;}
+  .group-toprow{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:8px;
+    margin-bottom:2px;
+  }
+  .bis-input{
+    font-family:'Times New Roman', Times, serif;
+    font-size:1.15rem;
+    font-weight:700;
+    color:var(--line);
+    background:transparent;
+    border:none;
+    border-bottom:1px dashed var(--line-soft);
+    text-align:right;
+    width:110px;
+    padding:0 2px;
+  }
+  .bis-input::placeholder{color:#b9d3d3;font-weight:500;}
+  .bis-input:focus{outline:none;border-bottom:1px solid var(--line);}
+
+  .line{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    margin:3px 0;
+  }
+  .line-tag{
+    flex:0 0 30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Times New Roman', Times, serif;
+    font-weight:700;
+    font-size:.72rem;
+    color:var(--ink-soft);
+    border:1px solid var(--grid-line);
+    border-radius:5px 0 0 5px;
+    background:#fbfaf6;
+  }
+  .cells{
+    display:flex;
+    align-items:stretch;
+    flex-wrap:wrap;
+    flex:1;
+    border:1px solid var(--grid-line);
+    border-left:none;
+    border-radius:0 5px 5px 0;
+    background:#fff;
+  }
+  .cell{
+    min-width:54px;
+    padding:5px 8px;
+    font-family:'Times New Roman', Times, serif;
+    font-size:.9rem;
+    outline:none;
+  }
+  .chord-line .cell{color:var(--chord);font-weight:700;}
+  .note-line .cell{color:var(--line);font-weight:500;}
+  .tapa-line .cell{color:var(--tapa);font-weight:500;}
+  .tapa-line{margin-bottom:6px;}
+  .cell:empty:before{
+    content:attr(data-placeholder);
+    color:#c7cad1;
+    font-weight:400;
+  }
+  .cell:focus{background:#fbf7ef;}
+  .cell.active-cell{outline:2px solid var(--chord);outline-offset:-2px;border-radius:3px;}
+
+  .divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:14px;
+    cursor:pointer;
+    color:#aeb4c2;
+    font-weight:700;
+    user-select:none;
+    font-family:'Times New Roman', Times, serif;
+  }
+  .divider:hover{color:var(--ink);background:var(--grid-line);}
+  .divider[data-bar="single"]{color:var(--ink);}
+  .divider[data-bar="double"]{color:var(--ink);font-size:.8rem;letter-spacing:-2px;}
+
+  .group-actions{
+    display:flex;
+    gap:6px;
+    margin-top:6px;
+    padding-left:34px;
+  }
+  .group-actions .btn{padding:4px 9px;font-size:.7rem;}
+
+  .section-actions{
+    display:flex;
+    gap:8px;
+    margin-top:6px;
+  }
+  .section-actions .btn{padding:5px 10px;font-size:.72rem;}
+
+  .add-section-row{
+    display:flex;
+    justify-content:center;
+    margin-top:8px;
+  }
+
+  .hint{
+    font-size:.74rem;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-top:26px;
+    line-height:1.5;
+  }
+  .hint b{color:var(--ink);}
+
+  @media (max-width:560px){
+    .app-title{font-size:2.1rem;}
+    .cell{min-width:40px;font-size:.8rem;}
+  }
+
+  /* ---------- paleta de notas ---------- */
+  #note-palette{
+    position:sticky;
+    bottom:14px;
+    margin:24px auto 0;
+    max-width:620px;
+    background:var(--card-bg);
+    border:1.5px solid var(--ink);
+    border-radius:12px;
+    box-shadow:0 10px 28px rgba(31,42,68,.16);
+    padding:10px 12px;
+    z-index:20;
+  }
+  .palette-label{
+    font-size:.68rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin:0 0 6px 2px;
+  }
+  .palette-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:6px;
+  }
+  .palette-row:last-child{margin-bottom:0;}
+  .note-btn{
+    font-family:'Times New Roman', Times, serif;
+    font-weight:700;
+    font-size:.82rem;
+    border:1.5px solid var(--chord);
+    color:var(--chord);
+    background:var(--chord-soft);
+    padding:6px 11px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .note-btn:hover{background:var(--chord);color:#fff;}
+  .note-btn.mod{
+    border-color:var(--line);
+    color:var(--line);
+    background:var(--line-soft);
+  }
+  .note-btn.mod:hover{background:var(--line);color:#fff;}
+  .note-btn.util{
+    border-color:var(--ink-soft);
+    color:var(--ink-soft);
+    background:#f1f1ee;
+  }
+  .note-btn.util:hover{background:var(--ink-soft);color:#fff;}
+  .note-btn:active{transform:scale(.94);}
+  #palette-hint{
+    font-size:.68rem;
+    color:var(--ink-soft);
+    margin:6px 2px 0;
+  }
+  @media print{ #note-palette{display:none !important;} }
+
+  /* ---------- print ---------- */
+  @media print{
+    .toolbar,.icon-btn,.group-actions,.section-actions,.add-section-row,.hint{display:none !important;}
+    .section-card{box-shadow:none;break-inside:avoid;}
+    body{background:#fff;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <div>
+      <h1 class="app-title">cifra<span>DOR</span> Zampoña</h1>
+      <p class="app-sub">Zampoña afinada en Sol mayor.</p>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="btn-copy">Copiar texto</button>
+      <button class="btn" id="btn-download">Descargar .txt</button>
+      <button class="btn primary" id="btn-print">Imprimir / PDF</button>
+    </div>
+  </div>
+
+  <div class="song-title-row">
+    <input id="song-title" placeholder="Título de la canción...">
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="add-section-row">
+    <button class="btn ghost" id="btn-add-section">+ Nueva sección (Estribillo, Verso...)</button>
+  </div>
+
+  <p class="hint">
+    Cada línea doble tiene tres renglones: <b>A</b> (acorde), <b>I</b> (nota) y
+    <b>T</b> (Tapa de sostenidos). Clic en las etiquetas A / I / T para renombrarlas.
+    Clic en el punto entre compases para poner <b>|</b> o <b>||</b>.
+    Selecciona cualquier compás (de A, I o T) y usa los botones de abajo para llenarlo.
+  </p>
+
+</div>
+
+<div id="note-palette">
+  <p class="palette-label">Toca un compás de A, I o T para seleccionarlo, luego un botón</p>
+  <div class="palette-row" id="row-naturales"></div>
+  <div class="palette-row" id="row-modificadores"></div>
+  <p id="palette-hint">Ningún compás seleccionado — haz clic en uno.</p>
+</div>
+
+<script>
+const sectionsEl = document.getElementById('sections');
+let sectionCount = 0;
+
+function makeCell(placeholder){
+  const c = document.createElement('div');
+  c.className = 'cell';
+  c.contentEditable = 'true';
+  c.spellcheck = false;
+  c.dataset.placeholder = placeholder || '';
+  return c;
+}
+
+function makeDivider(){
+  const d = document.createElement('div');
+  d.className = 'divider';
+  d.dataset.bar = 'none';
+  d.textContent = '·';
+  d.title = 'Clic para cambiar el compás ( | / || )';
+  d.addEventListener('click', () => {
+    const states = {none:['single','|'], single:['double','‖'], double:['none','·']};
+    const [next, glyph] = states[d.dataset.bar];
+    d.dataset.bar = next;
+    d.textContent = glyph;
+  });
+  return d;
+}
+
+function addMeasure(chordCells, noteCells, tapaCells, first){
+  if(!first){
+    chordCells.appendChild(makeDivider());
+    noteCells.appendChild(makeDivider());
+    tapaCells.appendChild(makeDivider());
+  }
+  chordCells.appendChild(makeCell('Sol'));
+  noteCells.appendChild(makeCell('Fa#'));
+  tapaCells.appendChild(makeCell('—'));
+}
+
+function buildLine(tagText, cellsHolder, lineClass, tooltip){
+  const line = document.createElement('div');
+  line.className = 'line ' + lineClass;
+  const tag = document.createElement('div');
+  tag.className = 'line-tag';
+  tag.contentEditable = 'true';
+  tag.spellcheck = false;
+  tag.textContent = tagText;
+  if(tooltip) tag.title = tooltip;
+  const cells = document.createElement('div');
+  cells.className = 'cells';
+  line.appendChild(tag);
+  line.appendChild(cells);
+  cellsHolder.el = line;
+  cellsHolder.cells = cells;
+  return line;
+}
+
+function addGroup(sectionBody){
+  const group = document.createElement('div');
+  group.className = 'group';
+
+  const topRow = document.createElement('div');
+  topRow.className = 'group-toprow';
+  const bis = document.createElement('input');
+  bis.className = 'bis-input';
+  bis.placeholder = 'Bis x2 (opcional)';
+  topRow.appendChild(bis);
+  group.appendChild(topRow);
+
+  const chordHolder = {};
+  const noteHolder = {};
+  const tapaHolder = {};
+  group.appendChild(buildLine('T', tapaHolder, 'tapa-line', 'T = Tapa de sostenidos'));
+  group.appendChild(buildLine('A', chordHolder, 'chord-line'));
+  group.appendChild(buildLine('I', noteHolder, 'note-line'));
+
+  addMeasure(chordHolder.cells, noteHolder.cells, tapaHolder.cells, true);
+
+  const actions = document.createElement('div');
+  actions.className = 'group-actions';
+
+  const addMBtn = document.createElement('button');
+  addMBtn.className = 'btn ghost';
+  addMBtn.textContent = '+ compás';
+  addMBtn.addEventListener('click', () => addMeasure(chordHolder.cells, noteHolder.cells, tapaHolder.cells, false));
+
+  function quitarUltimo(cells){
+    if(cells.lastChild) cells.removeChild(cells.lastChild);
+    if(cells.lastChild && cells.lastChild.className === 'divider')
+      cells.removeChild(cells.lastChild);
+  }
+
+  const delMBtn = document.createElement('button');
+  delMBtn.className = 'btn ghost';
+  delMBtn.textContent = '– compás';
+  delMBtn.addEventListener('click', () => {
+    quitarUltimo(chordHolder.cells);
+    quitarUltimo(noteHolder.cells);
+    quitarUltimo(tapaHolder.cells);
+  });
+
+  const delGBtn = document.createElement('button');
+  delGBtn.className = 'btn danger';
+  delGBtn.textContent = 'Eliminar grupo';
+  delGBtn.addEventListener('click', () => group.remove());
+
+  actions.appendChild(addMBtn);
+  actions.appendChild(delMBtn);
+  actions.appendChild(delGBtn);
+  group.appendChild(actions);
+
+  sectionBody.appendChild(group);
+}
+
+function addSection(){
+  sectionCount++;
+  const card = document.createElement('div');
+  card.className = 'section-card';
+
+  const head = document.createElement('div');
+  head.className = 'section-head';
+  const name = document.createElement('input');
+  name.className = 'section-name';
+  name.value = sectionCount === 1 ? 'ESTRIBILLO' : 'SECCIÓN ' + sectionCount;
+  const delBtn = document.createElement('button');
+  delBtn.className = 'icon-btn';
+  delBtn.textContent = '✕';
+  delBtn.title = 'Eliminar sección';
+  delBtn.addEventListener('click', () => card.remove());
+  head.appendChild(name);
+  head.appendChild(delBtn);
+
+  const body = document.createElement('div');
+  body.className = 'section-body';
+
+  card.appendChild(head);
+  card.appendChild(body);
+
+  const secActions = document.createElement('div');
+  secActions.className = 'section-actions';
+  const addGBtn = document.createElement('button');
+  addGBtn.className = 'btn ghost';
+  addGBtn.textContent = '+ grupo (A / I / T)';
+  addGBtn.addEventListener('click', () => addGroup(body));
+  secActions.appendChild(addGBtn);
+  card.appendChild(secActions);
+
+  addGroup(body);
+
+  sectionsEl.appendChild(card);
+}
+
+document.getElementById('btn-add-section').addEventListener('click', addSection);
+addSection();
+
+// ---------- paleta de notas ----------
+let activeCell = null;
+const hint = document.getElementById('palette-hint');
+
+document.addEventListener('focusin', (e) => {
+  if(e.target.classList.contains('cell')){
+    activeCell = e.target;
+    document.querySelectorAll('.cell.active-cell').forEach(c => c.classList.remove('active-cell'));
+    activeCell.classList.add('active-cell');
+    const tipo = activeCell.closest('.chord-line') ? 'acorde (A)' : 'nota (I)';
+    hint.textContent = 'Compás seleccionado: línea de ' + tipo + '.';
+  }
+});
+
+function placeCaretEnd(el){
+  el.focus();
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+function ensureActiveCell(){
+  if(activeCell && document.body.contains(activeCell)) return true;
+  const firstCell = document.querySelector('.cell');
+  if(firstCell){
+    activeCell = firstCell;
+    return true;
+  }
+  hint.textContent = 'Primero crea una sección con un compás.';
+  return false;
+}
+
+const NATURALES = ['Do','Re','Mi','Fa','Sol','La','Si'];
+const MODIFICADORES = [
+  {label:'#', title:'sostenido'},
+  {label:'b', title:'bemol'},
+  {label:'m', title:'menor'},
+  {label:'7', title:'séptima'},
+  {label:'dim', title:'disminuido'},
+  {label:'sus4', title:'suspendida'},
+];
+
+const rowNat = document.getElementById('row-naturales');
+NATURALES.forEach(n => {
+  const btn = document.createElement('button');
+  btn.className = 'note-btn';
+  btn.textContent = n;
+  btn.type = 'button';
+  btn.addEventListener('click', () => {
+    if(!ensureActiveCell()) return;
+    activeCell.textContent = n;
+    placeCaretEnd(activeCell);
+  });
+  rowNat.appendChild(btn);
+});
+
+const rowMod = document.getElementById('row-modificadores');
+MODIFICADORES.forEach(m => {
+  const btn = document.createElement('button');
+  btn.className = 'note-btn mod';
+  btn.textContent = m.label;
+  btn.title = m.title;
+  btn.type = 'button';
+  btn.addEventListener('click', () => {
+    if(!ensureActiveCell()) return;
+    activeCell.textContent = (activeCell.textContent + m.label);
+    placeCaretEnd(activeCell);
+  });
+  rowMod.appendChild(btn);
+});
+
+const utilBtns = [
+  {label:'⌫', action: () => { activeCell.textContent = activeCell.textContent.slice(0, -1); }},
+  {label:'Borrar', action: () => { activeCell.textContent = ''; }},
+];
+utilBtns.forEach(u => {
+  const btn = document.createElement('button');
+  btn.className = 'note-btn util';
+  btn.textContent = u.label;
+  btn.type = 'button';
+  btn.addEventListener('click', () => {
+    if(!ensureActiveCell()) return;
+    u.action();
+    placeCaretEnd(activeCell);
+  });
+  rowMod.appendChild(btn);
+});
+
+// ---------- export ----------
+function buildText(){
+  const title = document.getElementById('song-title').value.trim();
+  let out = title ? title.toUpperCase() + '\n\n' : '';
+
+  document.querySelectorAll('.section-card').forEach(card => {
+    const secName = card.querySelector('.section-name').value.trim();
+    out += secName + '\n';
+
+    card.querySelectorAll('.group').forEach(group => {
+      const bis = group.querySelector('.bis-input').value.trim();
+      const lines = group.querySelectorAll('.line');
+      lines.forEach(line => {
+        const tag = line.querySelector('.line-tag').textContent.trim() || '?';
+        let row = tag + ') ';
+        line.querySelectorAll('.cells > *').forEach(node => {
+          if(node.classList.contains('divider')){
+            const b = node.dataset.bar;
+            row += b === 'double' ? ' || ' : b === 'single' ? ' | ' : '  ';
+          } else {
+            row += (node.textContent.trim() || '·') + ' ';
+          }
+        });
+        out += row.trimEnd() + '\n';
+      });
+      if(bis) out += '   (' + bis + ')\n';
+      out += '\n';
+    });
+    out += '\n';
+  });
+  return out.trim() + '\n';
+}
+
+document.getElementById('btn-copy').addEventListener('click', () => {
+  const text = buildText();
+  navigator.clipboard.writeText(text).then(() => {
+    const b = document.getElementById('btn-copy');
+    const old = b.textContent;
+    b.textContent = '¡Copiado!';
+    setTimeout(() => b.textContent = old, 1200);
+  }).catch(() => alert('No se pudo copiar. Copia manualmente desde la descarga .txt.'));
+});
+
+document.getElementById('btn-download').addEventListener('click', () => {
+  const text = buildText();
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const title = document.getElementById('song-title').value.trim() || 'cifrado';
+  a.href = url;
+  a.download = title.replace(/\s+/g,'_') + '.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btn-print').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>
